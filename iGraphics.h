@@ -313,7 +313,7 @@ void iFilledEllipse(double x, double y, double a, double b, int slices=100)
 //  (x, y) - The pivot point for rotation
 //  degree - degree of rotation
 //
-// After calling iRotate(), evrey subsequent rendering will
+// After calling iRotate(), every subsequent rendering will
 // happen in rotated fashion. To stop rotation of subsequent rendering,
 // call iUnRotate(). Typical call pattern would be:
 //      iRotate();
