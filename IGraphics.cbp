@@ -56,7 +56,7 @@
 		<ExtraCommands>
 			<Add after="xcopy /y OpenGL\DLL\glut32.dll $TARGET_OUTPUT_DIR" />
 		</ExtraCommands>
-		<Unit filename="BallDemo.cpp" />
+		<Unit filename="SolarSystem.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
