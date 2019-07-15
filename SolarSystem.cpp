@@ -5,8 +5,26 @@
 # include "iGraphics.h"
 # include "gl.h"
 
+#define N_PLANETS 2
+#define N_SATELLITES 5
+
 int g_sunX, g_sunY, g_sunR;
-int g_planetOrbitR, g_planetR, g_planetSweepAngle;
+
+typedef struct _Planet {
+    int majorAxisLen;
+    int minorAxixLen;
+    int radius;
+    int sweepAngle;
+    int delSweepAngle;
+    int nSatellites;
+    //Satellite satellite[N_SATELLITES];
+} Planet;
+
+Planet g_planet[N_PLANETS] = {
+    { 160, 120, 7, 0, 5, 0 },
+    { 200, 150, 10, 0, 1, 0 }
+};
+
 int g_satelliteOrbitR, g_satelliteR, g_satelliteSweepAngle;
 
 void drawStar(int x, int y, int r) {
@@ -14,25 +32,26 @@ void drawStar(int x, int y, int r) {
     iFilledCircle(x, y, r);
 }
 
-void drawOrbit(int x, int y, int r) {
+void drawOrbit(int x, int y, int a, int b) {
     iSetColor(255, 255, 255);
-    iCircle(x, y, r);
+    iEllipse(x, y, a, b);
 }
 
-void drawPlanet(int starX, int starY, int orbitR, int planetR, int sweepAngle) {
+void drawPlanet(int x, int y, int orbitA, int orbitB, int planetR, int sweepAngle) {
     double pi = 2*acos(0);
     double sweepRadian = sweepAngle * pi / 180;
-    int planetX = starX + orbitR * cos(sweepRadian);
-    int planetY = starY + orbitR * sin(sweepRadian);
+    int planetX = x + orbitA * cos(sweepRadian);
+    int planetY = y + orbitB * sin(sweepRadian);
 
     iSetColor(125, 125, 125);
     iFilledCircle(planetX, planetY, planetR);
 }
 
 void drawSatellite(
-    int starX,
-    int starY,
-    int planetOrbitR,
+    int x,
+    int y,
+    int planetOrbitA,
+    int planetOrbitB,
     int planetSweepAngle,
     int satelliteOrbitR,
     int satelliteR,
@@ -41,8 +60,8 @@ void drawSatellite(
     double planetSweepRadian = planetSweepAngle * pi / 180;
     double satelliteSweepRadian = satelliteSweepAngle * pi / 180 + planetSweepRadian;
 
-    int planetX = starX + planetOrbitR * cos(planetSweepRadian);
-    int planetY = starY + planetOrbitR * sin(planetSweepRadian);
+    int planetX = x + planetOrbitA * cos(planetSweepRadian);
+    int planetY = y + planetOrbitB * sin(planetSweepRadian);
 
     int satelliteX = planetX + satelliteOrbitR * cos(satelliteSweepRadian);
     int satelliteY = planetY + satelliteOrbitR * sin(satelliteSweepRadian);
@@ -56,23 +75,41 @@ void drawSatellite(
 */
 void iDraw()
 {
-	//place your drawing codes here
+	double centerX, centerY;
+	int i;
 
 	iClear();
 
-	drawStar(g_sunX, g_sunY, g_sunR);
-	drawOrbit(g_sunX, g_sunY, g_planetOrbitR);
-	drawPlanet(g_sunX, g_sunY, g_planetOrbitR, g_planetR, g_planetSweepAngle);
-	drawSatellite(
-        g_sunX,
-        g_sunY,
-        g_planetOrbitR,
-        g_planetSweepAngle,
-        g_satelliteOrbitR,
-        g_satelliteR,
-        g_satelliteSweepAngle
-        );
+	//
+	// The sun is at the left focal point of the eliptical orbit. So, the center of orbit
+	// needs to be translated appropriately.
+	//
 
+	drawStar(g_sunX, g_sunY, g_sunR);
+
+	for (i = 0; i < N_PLANETS; i++) {
+        centerX = g_sunX + sqrt(pow(g_planet[i].majorAxisLen, 2) - pow(g_planet[i].minorAxixLen, 2));
+        centerY = g_sunY;
+        drawOrbit(centerX, centerY, g_planet[i].majorAxisLen, g_planet[i].minorAxixLen);
+        drawPlanet(
+            centerX,
+            centerY,
+            g_planet[i].majorAxisLen,
+            g_planet[i].minorAxixLen,
+            g_planet[i].radius,
+            g_planet[i].sweepAngle
+            );
+//        drawSatellite(
+//            centerX,
+//            centerY,
+//            g_planetOrbitA,
+//            g_planetOrbitB,
+//            g_planetSweepAngle,
+//            g_satelliteOrbitR,
+//            g_satelliteR,
+//            g_satelliteSweepAngle
+//            );
+	}
 	iSetColor(255, 255, 255);
 	iText(10, 10, "Press p for pause, r for resume, END for exit.");
 }
@@ -140,31 +177,29 @@ void iSpecialKeyboard(unsigned char key)
 }
 
 void movePlanets(){
-    const int g_dPlanetSweepAngle = 1;
     const int g_dSatelliteSweepAngle = 10;
-    g_planetSweepAngle = (g_planetSweepAngle + g_dPlanetSweepAngle)%360;
-    g_satelliteSweepAngle = (g_satelliteSweepAngle + g_dSatelliteSweepAngle)%360;
+
+    int i;
+
+    for (i = 0; i < N_PLANETS; i++) {
+        g_planet[i].sweepAngle = (g_planet[i].sweepAngle + g_planet[i].delSweepAngle)%360;
+        g_satelliteSweepAngle = (g_satelliteSweepAngle + g_dSatelliteSweepAngle)%360;
+    }
 }
 
 int main()
 {
-    const int CX_MAX = 800;
-    const int CY_MAX = 600;
+    const int CX_MAX = 1366;
+    const int CY_MAX = 768;
 
     // Initialize Sun's position and size.
-    g_sunX = CX_MAX/2;
+    g_sunX = 150;
     g_sunY = CY_MAX/2;
-    g_sunR = 25;
-
-    // Initialize earth's orbit and radius
-    g_planetOrbitR = 100;
-    g_planetR = 10;
-    g_planetSweepAngle = 0;
+    g_sunR = 40;
 
     // Initialize moon's orbit and radius
-    g_satelliteOrbitR = 40;
+    g_satelliteOrbitR = 20;
     g_satelliteR = 5;
-    g_planetSweepAngle = 45;
 
 	//place your own initialization codes here.
 	iSetTimer(20, movePlanets);
