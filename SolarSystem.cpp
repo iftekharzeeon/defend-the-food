@@ -1,6 +1,6 @@
 /*
-	author: S. M. Shahriar Nirjon
-	last modified: August 8, 2008
+	Author: Saifur Rahman, CSE, BUET
+	Last modified: July 17, 2019
 */
 # include "iGraphics.h"
 # include "gl.h"
@@ -16,6 +16,7 @@
 int g_sunX, g_sunY, g_sunR;
 int g_fDrawPlanetOrbit = 1;
 int g_fDrawSatelliteOrbit = 1;
+double g_scaleFactor = 1;
 
 typedef struct _Planet {
     int majorAxisLen;
@@ -32,10 +33,11 @@ Planet g_satellite[] = {
 };
 
 Planet g_planet[] = {
-    { 320,  240,  6, 0,  5, {256, 50, 50}  , NULL },
-    { 400,  300, 11, 0,  2, {200, 80, 80}  , NULL },
-    { 500,  360, 10, 0,  1, {125, 125, 125}, &g_satellite[0] },
-    { 1000, 400,  5, 0, 10, {256, 0, 0}    , NULL }
+    { 320,  240,  6, 0,  5, {256,  50,  50}, NULL               },
+    { 400,  300, 11, 0,  2, {200,  80,  80}, NULL               },
+    { 500,  360, 10, 0,  1, {125, 125, 125}, &g_satellite[0]    },
+    { 1200, 300,  6, 0, 10, {  0, 256,   0}, NULL               },
+    { 1000, 400,  5, 0, 10, {256,   0,   0}, NULL               }
 };
 #define N_PLANETS (sizeof(g_planet)/sizeof(g_planet[0]))
 
@@ -43,7 +45,7 @@ int g_satelliteOrbitR, g_satelliteR, g_satelliteSweepAngle;
 
 void drawStar(int x, int y, int r) {
     iSetColor(255, 255, 0);
-    iFilledCircle(x, y, r);
+    iFilledCircle(x * g_scaleFactor, y * g_scaleFactor, r * g_scaleFactor);
 }
 
 void drawPlanet(int x, int y, Planet planet, int fDrawOrbit, int fDrawSatOrbit) {
@@ -55,11 +57,11 @@ void drawPlanet(int x, int y, Planet planet, int fDrawOrbit, int fDrawSatOrbit) 
 
     if (fDrawOrbit) {
         iSetColor(255, 255, 255);
-        iEllipse(x, y, planet.majorAxisLen, planet.minorAxisLen);
+        iEllipse(x * g_scaleFactor, y * g_scaleFactor, planet.majorAxisLen * g_scaleFactor, planet.minorAxisLen * g_scaleFactor);
     }
 
     iSetColor(planet.rgb.r, planet.rgb.g, planet.rgb.b);
-    iFilledCircle(planetX, planetY, planet.radius);
+    iFilledCircle(planetX * g_scaleFactor, planetY * g_scaleFactor, planet.radius * g_scaleFactor);
 
     // Now draw the satellites
     while (pSat) {
@@ -72,14 +74,13 @@ void drawPlanet(int x, int y, Planet planet, int fDrawOrbit, int fDrawSatOrbit) 
 
         if (fDrawSatOrbit) {
             iSetColor(255, 255, 255);
-            iEllipse(centerX, centerY, pSat->majorAxisLen, pSat->minorAxisLen);
+            iEllipse(centerX * g_scaleFactor, centerY * g_scaleFactor, pSat->majorAxisLen * g_scaleFactor, pSat->minorAxisLen * g_scaleFactor);
         }
 
         iSetColor(pSat->rgb.r, pSat->rgb.g, pSat->rgb.b);
-        iFilledCircle(satelliteX, satelliteY, satelliteR);
+        iFilledCircle(satelliteX * g_scaleFactor, satelliteY * g_scaleFactor, satelliteR * g_scaleFactor);
         pSat = pSat->satellites;
     }
-    //drawPlanet(isPlanet = false)
 }
 
 void drawSatellite(
@@ -207,6 +208,12 @@ void iSpecialKeyboard(unsigned char key)
             break;
         case GLUT_KEY_UP:
             g_sunY -= DEL_SCREEN_Y;
+            break;
+        case GLUT_KEY_PAGE_UP:
+            g_scaleFactor *= 1.2;
+            break;
+        case GLUT_KEY_PAGE_DOWN:
+            g_scaleFactor /= 1.2;
             break;
 
 
