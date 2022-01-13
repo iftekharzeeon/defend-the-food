@@ -22,6 +22,7 @@
 					<Add library="glut32" />
 					<Add library="OPENGL32" />
 					<Add library="gdi32" />
+					<Add library="OpenGL/lib/WinMM.Lib" />
 					<Add directory="./OpenGL/lib" />
 				</Linker>
 				<ExtraCommands>
@@ -56,7 +57,7 @@
 		<ExtraCommands>
 			<Add after="xcopy /y OpenGL\DLL\glut32.dll $TARGET_OUTPUT_DIR" />
 		</ExtraCommands>
-		<Unit filename="SolarSystem.cpp" />
+		<Unit filename="BallDemo.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
